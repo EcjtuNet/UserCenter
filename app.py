@@ -68,7 +68,9 @@ def user():
         return json.dumps({'result':False, 'msg':'Permission denied'})
     if token.is_expired():
         return json.dumps({'result':False, 'msg':'Token expired'})
-    return json.dumps({'result':True, 'user':token.user.to_dict(exclude='password')}) 
+    result = get((u, s) for u in User for s in StudentInfo 
+            if u.student_id==username and s.StudentID==username)
+    return json.dumps({'result':True, 'user':result.to_dict(exclude='password')}) 
 
 @app.route("/")
 def index():
