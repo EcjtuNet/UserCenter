@@ -6,6 +6,7 @@ from pony.orm import *
 from pony.orm.serialization import to_dict
 import json
 from functools import wraps
+import cronwork
 
 app = Flask(__name__)
 
@@ -77,6 +78,7 @@ def index():
     return 'hello world'   
 
 if __name__ == '__main__':
+    cronwork.start()
     if Config.get('develop'):
         app.run(host='0.0.0.0', use_reloader=False)
     else:
