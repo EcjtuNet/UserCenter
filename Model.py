@@ -54,7 +54,7 @@ class User(db.Entity):
     @classmethod
     def is_exist(cls, username):
         return User.get(student_id=username) 
-        
+
     def _setToken(self):
         self.token = self.tokens.create(token=User._makeToken(self.student_id), last_use_time=str(int(time.time())))
 

@@ -16,23 +16,24 @@ if Config.get('debug'):
 def with_permission(func):
     @wraps(func)
     def _check_permission(**args):
-        student_id = args['student_id']
-        u = User.getBySid(str(student_id))
+        username = args['username']
+        u = User.get(student_id=str(username))
         if not u:
-            return json.dumps({'result':False, 'msg':'No such user'})        
+            return json.dumps({'result':False, 'msg':'No such user'})
         if request.form.has_key('token'):
             token = request.form['token']   
         elif request.args.get('token'):
             token = request.args.get('token')
         elif session.has_key('token'):
             token = session['token']
-        else:
-            return json.dumps({'result':False, 'msg':'Permission denied'})        
-        if not Token.get(token=token):
-            return json.dumps({'result':False, 'msg':'Permission denied'})        
-        return func(**args)
+        token = Token.get(user=u, token=token)
+        if not token:
+            return json.dumps({'result':False, 'msg':'Permission denied'})
+        if token.is_expired():
+            return json.dumps({'result':False, 'msg':'Token expired'})
+        return func(u, **args)
     return _check_permission
-   
+
 @app.route("/api/login", methods=['POST'])
 @db_session
 def login():
@@ -61,23 +62,22 @@ def register():
     else:
         return json.dumps({'result':False, 'msg':'Register error'})
 
-@app.route("/api/user/<int:username>")
+@app.route("/api/user/<int:username>", methods=['GET'])
 @db_session
-def user(username):
-    u = User.get(student_id=str(username))
-    if not u:
-        return json.dumps({'result':False, 'msg':'No such user'})
-    token = Token.get(user=u, token=request.args.get('token'))
-    if not token:
-        return json.dumps({'result':False, 'msg':'Permission denied'})
-    if token.is_expired():
-        return json.dumps({'result':False, 'msg':'Token expired'})
-    r = get((u, s) for u in User for s in StudentInfo 
-            if u.student_id==username and s.StudentID==username)
-    u = r[0].to_dict(exclude='password')
-    s = r[1].to_dict()
+@with_permission
+def user(u, username):
+    r = get(s for s in StudentInfo if s.StudentID==username)
+    u = u.to_dict(exclude='password')
+    s = r.to_dict()
     result = dict(u, **s)
     return json.dumps({'result':True, 'user':result}) 
+
+@app.route("/api/user/<int:username>", methods=['POST'])
+@db_session
+@with_permission
+def user_edit(u, username):
+    return json.dumps(request.form)
+
 
 @app.route("/")
 def index():
