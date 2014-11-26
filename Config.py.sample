@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+config = {
+    'salt' : '123456',#Change it!
+    'token_expire' : 3600,#second
+    'host' : '127.0.0.1',
+    'user' : 'user',
+    'passwd' : 'password',
+    'db' : 'db',
+    'charset' : 'utf8',
+    'develop' : False,
+    'debug' : False,
+    'redis_host' : 'localhost',
+    'redis_port' : '6379',
+    'redis_db' : 0,
+    'StudentInfo_update_url' : 'http://172.16.47.252/mis_o/cj.php?update=StudentInfo'
+}
+def get(str):
+    return config[str]
