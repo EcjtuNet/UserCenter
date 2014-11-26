@@ -14,10 +14,10 @@ import json
 @db_session
 def cronwork1():
     url = Config.get('StudentInfo_update_url')
-    s = urllib.urlopen(url).read()
+    s = urllib.urlopen(url).read()[3:]
     a = json.loads(s)
     for row in a:
-        s = StudentInfo[row['StudentID']]
+        s = StudentInfo(StudentID=str(row['StudentID']))
         if s:
             s.set(**row)
         else:

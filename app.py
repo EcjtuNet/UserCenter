@@ -10,7 +10,7 @@ import cronwork
 
 app = Flask(__name__)
 
-if Config.get('develop'):
+if Config.get('debug'):
     app.debug = True
 
 def with_permission(func):
@@ -63,15 +63,21 @@ def register():
 
 @app.route("/api/user/<int:username>")
 @db_session
-def user():
-    token = Token.get(user=username, token=request.args.get('token'))
+def user(username):
+    u = User.get(student_id=str(username))
+    if not u:
+        return json.dumps({'result':False, 'msg':'No such user'})
+    token = Token.get(user=u, token=request.args.get('token'))
     if not token:
         return json.dumps({'result':False, 'msg':'Permission denied'})
     if token.is_expired():
         return json.dumps({'result':False, 'msg':'Token expired'})
-    result = get((u, s) for u in User for s in StudentInfo 
+    r = get((u, s) for u in User for s in StudentInfo 
             if u.student_id==username and s.StudentID==username)
-    return json.dumps({'result':True, 'user':result.to_dict(exclude='password')}) 
+    u = r[0].to_dict(exclude='password')
+    s = r[1].to_dict()
+    result = dict(u, **s)
+    return json.dumps({'result':True, 'user':result}) 
 
 @app.route("/")
 def index():

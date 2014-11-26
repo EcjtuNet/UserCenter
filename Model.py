@@ -27,9 +27,10 @@ class User(db.Entity):
     @classmethod
     def login(cls, username, password):
         u = User.get(student_id=username)
-        if u.password=='':
-            s = StudentInfo.get(username)
-            if s.IDCard[:-6]==password:
+        if not u or u.password=='':
+            s = StudentInfo.get(StudentID=username)
+            if s.IDCard[-6:]==password:
+                u = User(student_id=username, reg_time = str(int(time.time())))
                 u.password = User._salt(username, password)
                 u._setToken()
                 return u
