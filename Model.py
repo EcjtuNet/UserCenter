@@ -12,10 +12,10 @@ else:
     db = Database('mysql', host=Config.get('host'), user=Config.get('user'), passwd=Config.get('passwd'), db=Config.get('db'))
 
 class User(db.Entity):
-    name = Optional(str)
     password = Optional(str)
-    student_id = Required(str, unique=True)
+    student_id = PrimaryKey(str)
     email = Optional(str, unique=True)
+    phone = Optional(str)
     ykt = Optional(str)
     reg_time = Required(str)
     tokens = Set(lambda: Token)
@@ -26,9 +26,20 @@ class User(db.Entity):
 
     @classmethod
     def login(cls, username, password):
-        u = User.get(student_id=username, password=User._salt(username, password))
-        u._setToken()
-        return u
+        u = User.get(student_id=username)
+        if u.password=='':
+            s = StudentInfo.get(username)
+            if s.IDCard[:-6]==password:
+                u.password = User._salt(username, password)
+                u._setToken()
+                return u
+            else:
+                return False
+        elif u.password==User._salt(username, password):
+            u._setToken()
+            return u
+        else:
+            return False
     
     @classmethod
     def register(cls, username, password):
@@ -68,4 +79,25 @@ class Token(db.Entity):
         else:
             return True
 
+class StudentInfo(db.Entity):
+    StudentID = PrimaryKey(str)
+    ClassCode = Optional(str)
+    Name = Optional(str)
+    Sex = Optional(str)
+    Birth = Optional(str)
+    Nationality = Optional(str)
+    Political = Optional(str)
+    EduType = Optional(str)
+    Classify = Optional(str)
+    Source = Optional(str)
+    Native = Optional(str)
+    Class = Optional(str)
+    EducationLen = Optional(str)
+    DiplomaNo = Optional(str)
+    DgreeNo = Optional(str)
+    StudyFlag = Optional(str)
+    PunishFlag = Optional(str)
+    IDCard = Optional(str)
+    KSH = Optional(str)
+    
 db.generate_mapping(create_tables=True)

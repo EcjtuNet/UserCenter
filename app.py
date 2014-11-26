@@ -60,10 +60,10 @@ def register():
     else:
         return json.dumps({'result':False, 'msg':'Register error'})
 
-@app.route("/api/user")
+@app.route("/api/user/<int:username>")
 @db_session
 def user():
-    token = Token.get(token=request.args.get('token'))
+    token = Token.get(user=username, token=request.args.get('token'))
     if not token:
         return json.dumps({'result':False, 'msg':'Permission denied'})
     if token.is_expired():
