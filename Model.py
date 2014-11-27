@@ -19,6 +19,10 @@ class User(db.Entity):
     ykt = Optional(str)
     reg_time = Required(str)
     tokens = Set(lambda: Token)
+    def before_insert(self):
+        self.password = self._salt(self.student_id, self.password)
+    def before_update(self):
+        self.password = self._salt(self.student_id, self.password)
 
     @classmethod
     def getBySid(cls, student_id):
@@ -31,7 +35,7 @@ class User(db.Entity):
             s = StudentInfo.get(StudentID=username)
             if s.IDCard[-6:]==password:
                 u = User(student_id=username, reg_time = str(int(time.time())))
-                u.password = User._salt(username, password)
+                u.password = password
                 u._setToken()
                 return u
             else:

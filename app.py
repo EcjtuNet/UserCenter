@@ -76,7 +76,15 @@ def user(u, username):
 @db_session
 @with_permission
 def user_edit(u, username):
-    return json.dumps(request.form)
+    form = {}
+    for i in request.form:
+        if i in ['password','email','phone','ykt']:
+            form[i] = request.form[i]
+    if form:
+        u.set(**form)
+        u.flush()
+        return json.dumps({'result':True, 'user':u.to_dict(exclude='password')})
+    return json.dumps({'result':False})
 
 
 @app.route("/")
