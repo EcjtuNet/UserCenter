@@ -1,0 +1,10 @@
+<!doctype html>
+<title>login</title>
+{% if error %}
+	<p>Username or password is incorrect</p>
+{% endif %}
+<form action="login?redirect={{ request.args.redirect }}" method="POST">
+	<p>StudentID:<input type="text" name="username" value="{{ request.form.username }}"/></p>	
+	<p>Password:<input type="text" name="password" /></p>
+	<input type="submit" value="Submit" />
+</form>

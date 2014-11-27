@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from flask import Flask, request, session
+from flask import Flask, request, render_template, redirect, url_for, abort, make_response
 from Model import *
 from pony.orm import *
 from pony.orm.serialization import to_dict
 import json
 from functools import wraps
 import cronwork
-
 app = Flask(__name__)
 
 if Config.get('debug'):
@@ -36,7 +35,7 @@ def with_permission(func):
 
 @app.route("/api/login", methods=['POST'])
 @db_session
-def login():
+def api_login():
     username = request.form['username']
     password = request.form['password']
     u = User.login(username, password)
@@ -47,7 +46,7 @@ def login():
     
 @app.route("/api/register", methods=['POST'])
 @db_session
-def register():
+def api_register():
     username = request.form['username']
     password = request.form['password']
     if User.is_exist(username):
@@ -65,7 +64,7 @@ def register():
 @app.route("/api/user/<int:username>", methods=['GET'])
 @db_session
 @with_permission
-def user(u, username):
+def api_user(u, username):
     r = get(s for s in StudentInfo if s.StudentID==username)
     u = u.to_dict(exclude='password')
     s = r.to_dict()
@@ -75,7 +74,7 @@ def user(u, username):
 @app.route("/api/user/<int:username>", methods=['POST'])
 @db_session
 @with_permission
-def user_edit(u, username):
+def api_user_edit(u, username):
     form = {}
     for i in request.form:
         if i in ['password','email','phone','ykt']:
@@ -86,14 +85,43 @@ def user_edit(u, username):
         return json.dumps({'result':True, 'user':u.to_dict(exclude='password')})
     return json.dumps({'result':False})
 
+@app.route("/login", methods=['GET'])
+@db_session
+def show_login():
+    return render_template('login.html')
+
+@app.route("/login", methods=['POST'])
+@db_session
+def login():
+    username = request.form['username']
+    password = request.form['password']
+    redirect_url = request.args.get('redirect') if request.args.get('redirect') else 'http://www.ecjtu.net'
+    u = User.login(username, password)
+    if u:
+        resp = make_response(redirect(redirect_url))
+        expires = int(time.time()) + Config.get('cookie_expire')
+        resp.set_cookie('student_id', u.student_id, expires=expires, domain='.ecjtu.net')
+        resp.set_cookie('uc_token', u.token.to_dict()['token'], expires=expires, domain='.ecjtu.net')
+        return resp
+    else:
+        return render_template('login.html', error=True)
+
+@app.route("/user", methods=['GET'])
+@db_session
+@with_permission
+def show_user(u, username):
+    r = get(s for s in StudentInfo if s.StudentID==username)
+    data = u.to_dict(exclude='password')
+    data = dict(data, **r.to_dict())
+    return render_template('user.html', **data)
 
 @app.route("/")
 def index():
-    return 'hello world'   
+    return redirect(url_for('show_login'))
 
 if __name__ == '__main__':
     cronwork.start()
-    if Config.get('develop'):
-        app.run(host='0.0.0.0', use_reloader=False)
+    if Config.get('debug'):
+        app.run(host='0.0.0.0', use_reloader=True)
     else:
         app.run(host='0.0.0.0', use_reloader=False)

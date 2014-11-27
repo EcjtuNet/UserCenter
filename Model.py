@@ -7,9 +7,11 @@ import time
 
 if Config.get('develop') == True:
     db = Database('sqlite', 'test.sqlite', create_db=True)
-    sql_debug(True)
 else:
     db = Database('mysql', host=Config.get('host'), user=Config.get('user'), passwd=Config.get('passwd'), db=Config.get('db'))
+
+if Config.get('debug') == True:
+    sql_debug(True)
 
 class User(db.Entity):
     password = Optional(str)
@@ -30,6 +32,8 @@ class User(db.Entity):
 
     @classmethod
     def login(cls, username, password):
+        if not username:
+            return False
         u = User.get(student_id=username)
         if not u or u.password=='':
             s = StudentInfo.get(StudentID=username)
