@@ -12,24 +12,32 @@ app = Flask(__name__)
 if Config.get('debug'):
     app.debug = True
 
+def get_token(request):
+    if request.cookies.get('uc_token'):
+        token = request.cookies.get('uc_token')
+    if request.form.has_key('token'):
+        token = request.form['token']   
+    if request.args.get('token'):
+        token = request.args.get('token')
+    return token
+
+
 def with_permission(func):
     @wraps(func)
     def _check_permission(**args):
-        username = args['username']
+        username = args['username'] if 'username' in args else request.cookies.get('student_id')
         u = User.get(student_id=str(username))
         if not u:
             return json.dumps({'result':False, 'msg':'No such user'})
-        if request.form.has_key('token'):
-            token = request.form['token']   
-        elif request.args.get('token'):
-            token = request.args.get('token')
-        elif session.has_key('token'):
-            token = session['token']
+        token = get_token(request)
+        if not token:
+            return json.dumps({'result':False, 'msg':'Permission denied'})
         token = Token.get(user=u, token=token)
         if not token:
             return json.dumps({'result':False, 'msg':'Permission denied'})
         if token.is_expired():
             return json.dumps({'result':False, 'msg':'Token expired'})
+        args['username'] = u.student_id
         return func(u, **args)
     return _check_permission
 
@@ -88,6 +96,11 @@ def api_user_edit(u, username):
 @app.route("/login", methods=['GET'])
 @db_session
 def show_login():
+    token = get_token(request)
+    if token:
+        t = Token.get(token=token)
+        if not t.is_expired():
+            return redirect(url_for('show_user'))
     return render_template('login.html')
 
 @app.route("/login", methods=['POST'])
@@ -95,7 +108,7 @@ def show_login():
 def login():
     username = request.form['username']
     password = request.form['password']
-    redirect_url = request.args.get('redirect') if request.args.get('redirect') else 'http://www.ecjtu.net'
+    redirect_url = request.args.get('redirect') if request.args.get('redirect') else url_for('show_user')
     u = User.login(username, password)
     if u:
         resp = make_response(redirect(redirect_url))
@@ -112,7 +125,8 @@ def login():
 def show_user(u, username):
     r = get(s for s in StudentInfo if s.StudentID==username)
     data = u.to_dict(exclude='password')
-    data = dict(data, **r.to_dict())
+    data = dict(data, **(r.to_dict()))
+    print data
     return render_template('user.html', **data)
 
 @app.route("/")
