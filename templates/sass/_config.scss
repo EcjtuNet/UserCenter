@@ -1,0 +1,19 @@
+@charset "utf-8";
+
+/* 布局
+ -------------------------------------------------------------*/
+$sub-width:         0;
+$extra-width:       0;
+$max-width:         700px;
+$base-width:        1020;
+$base-height:       1811;
+$header-height:     156px + 60px;
+$wrap-width:        (1020-60*2)/1020*100%;
+$images-path:        "../images/";
+$sprite-path:       $images-path + 'sprite.png';
+$base-blue:         #66a7fa;
+$base-blue-end:     rgba(102, 167, 250, 1); 
+$base-blue-fir:     rgba(102, 167, 250, 0);
+$font-family:       "Microsoft YaHei","微软雅黑",STHeiti, arial,sans-serif;
+$red:               #fe9896;
+$input-font:        16px;

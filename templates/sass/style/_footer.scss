@@ -1,0 +1,50 @@
+@charset "utf-8";
+
+
+footer {
+    margin-top: (125 / $base-height) * 100%;
+    font: 15px/1.8 "Microsoft YaHei","微软雅黑",STHeiti, arial,sans-serif;
+    color: $base-blue;
+    
+    a {
+        color: $base-blue;
+        padding: 0 5px;
+    }
+}
+#grad {
+    position: relative;
+}
+#tip {
+    position: absolute;
+    right: 15px;
+    top: -8px;
+    color: #a3ccff;
+}
+#gradl, #gradr {
+    display: inline-block;
+    width: 50%;
+    height: 1px;   
+}
+#gradl {
+    background: -webkit-linear-gradient(left, $base-blue-fir, $base-blue-end);
+    background: -moz-linear-gradient(left, $base-blue-fir, $base-blue-end);
+    background: -o-linear-gradient(left, $base-blue-fir, $base-blue-end);
+    background: linear-gradient(left, $base-blue-fir, $base-blue-end);
+}
+#gradr {
+    background: -webkit-linear-gradient(left, $base-blue-end, $base-blue-fir);
+    background: -moz-linear-gradient(left, $base-blue-end, $base-blue-fir);
+    background: -o-linear-gradient(left, $base-blue-end, $base-blue-fir);
+    background: linear-gradient(left, $base-blue-end, $base-blue-fir);
+}
+ 
+p {
+    text-align: center;
+}
+
+.cricon {
+    display: inline-block;
+    width: 19px;
+    height: 13px;
+    background: url($sprite-path) -10px;  
+}
