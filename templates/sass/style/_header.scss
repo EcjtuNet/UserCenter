@@ -1,0 +1,42 @@
+@charset "utf-8";
+
+
+header {
+    width: 100%;
+
+    .wrap {
+        margin: 0 auto;
+        padding: 30px 0;
+        width: 100%;
+        max-width: $max-width;
+        background: #c7dffc;
+    }
+    
+}
+
+#mlogo {
+    width: 150px;
+
+    img {
+        width: 100%;
+    }
+}
+
+#tl, #tr {
+    height: 0;
+    z-index: 10;
+    width: 485px;
+    border-width: $header-height 300px;
+    position: absolute;
+}
+
+#tl {
+    border-color:  transparent transparent #bfdbfb;
+}
+#tr {
+    background: #c7dffc;
+    border-color: #c7dffc transparent transparent;
+}
+a{
+    color: #000;
+}

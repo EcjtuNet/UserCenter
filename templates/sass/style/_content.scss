@@ -1,0 +1,45 @@
+@charset "utf-8";
+
+#content, footer, #content .wrap, footer .wrap {
+    max-width: $max-width;
+    margin: 0 auto;
+}
+
+#content {
+    padding: 18px 0;
+
+    input {
+        display: block;
+        width: 80%;
+        margin: 0 auto;
+        border: 1px solid $base-blue;
+        font: #{$input-font}/2 $font-family;
+        padding: 0 5%;
+        outline: 0;
+        @include radius(#{$input-font + 1px});
+    }
+    input + input {
+        margin-top: 20px;
+    }
+
+    #submit {
+        width: 88%;
+        background: rgb(221, 221, 221);
+        color: #fff;
+        border: 0;
+    }
+
+    span {
+        font: italic 14px/1.0 $font-family;
+        color: red;
+    }
+}
+.helper {
+    color: $red;
+    font: 18px/2.2 $font-family;
+}
+.help-block {
+    color: rgba(red, 0.7);
+    font: italic 14px/2.0 $font-family;
+    margin-bottom: 20px;
+}
