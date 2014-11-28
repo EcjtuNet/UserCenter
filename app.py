@@ -13,6 +13,7 @@ if Config.get('debug'):
     app.debug = True
 
 def get_token(request):
+    token = False
     if request.cookies.get('uc_token'):
         token = request.cookies.get('uc_token')
     if request.form.has_key('token'):
@@ -20,7 +21,6 @@ def get_token(request):
     if request.args.get('token'):
         token = request.args.get('token')
     return token
-
 
 def with_permission(func):
     @wraps(func)
