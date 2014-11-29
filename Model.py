@@ -92,7 +92,8 @@ class Token(db.Entity):
 
 class StudentInfo(db.Entity):
     StudentID = PrimaryKey(str)
-    ClassCode = Optional(str) Name = Optional(str)
+    ClassCode = Optional(str) 
+    Name = Optional(str)
     Sex = Optional(str)
     Birth = Optional(str)
     Nationality = Optional(str)
