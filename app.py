@@ -6,6 +6,8 @@ from pony.orm import *
 from pony.orm.serialization import to_dict
 import json
 from functools import wraps
+from PIL import Image
+import time
 import cronwork
 app = Flask(__name__)
 
@@ -105,6 +107,25 @@ def api_user_edit(u, username):
         u.flush()
         return json.dumps({'result':True, 'user':u.to_dict(exclude='password')})
     return json.dumps({'result':False})
+
+@app.route("/api/user/<int:username>/avatar", methods=['POST'])
+@db_session
+@with_permission
+def api_user_avatar_edit(u, username):
+    img = request.files['avatar']
+    img = Image.open(img)
+    if not img:
+        return json.dumps({'result':False})
+    path = './uploads/' 
+    filename = str(u.student_id)[2:] + str(time.time())[-2] + '.jpg'
+    try:
+        img.thumbnail((64, 64))
+        img.save(path + filename, 'JPEG')
+    except:
+        return json.dumps({'result':False})
+    u.avatar = filename
+    u.flush()
+    return json.dumps({'result':True, 'avatar':'user.ecjtu.net/uploads/'+str(u.avatar)})
 
 @app.route("/login", methods=['GET'])
 @db_session

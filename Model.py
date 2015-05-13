@@ -20,6 +20,7 @@ class User(db.Entity):
     phone = Optional(str)
     ykt = Optional(str)
     reg_time = Required(str)
+    avatar = Optional(str)
     tokens = Set(lambda: Token)
     def before_insert(self):
         self.password = self._salt(self.student_id, self.password)
