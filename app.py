@@ -22,23 +22,28 @@ def get_token(request):
         token = request.args.get('token')
     return token
 
+def check_permission(username, token):
+    u = User.get(student_id=str(username)) 
+    if not u:
+        return 'No such user'
+    if not token:
+        return 'Permission denied'
+    token = Token.get(user=u, token=token)
+    if not token:
+        return 'Permission denied'
+    if token.is_expired():
+        return 'Token expired'
+    return u
+
 def with_permission(func):
     @wraps(func)
     def _check_permission(**args):
         username = args['username'] if 'username' in args else request.cookies.get('student_id')
-        u = User.get(student_id=str(username))
-        if not u:
-            return json.dumps({'result':False, 'msg':'No such user'})
-        token = get_token(request)
-        if not token:
-            return json.dumps({'result':False, 'msg':'Permission denied'})
-        token = Token.get(user=u, token=token)
-        if not token:
-            return json.dumps({'result':False, 'msg':'Permission denied'})
-        if token.is_expired():
-            return json.dumps({'result':False, 'msg':'Token expired'})
-        args['username'] = u.student_id
-        return func(u, **args)
+        result = check_permission(username, get_token(request))
+        if not isinstance(result, User):
+            return json.dumps({'result':False, 'msg':str(result)})
+        args['username'] = result.student_id
+        return func(result, **args)
     return _check_permission
 
 @app.route("/api/login", methods=['POST'])
@@ -71,13 +76,21 @@ def api_register():
 
 @app.route("/api/user/<int:username>", methods=['GET'])
 @db_session
-@with_permission
-def api_user(u, username):
-    r = get(s for s in StudentInfo if s.StudentID==username)
-    u = u.to_dict(exclude='password')
-    s = r.to_dict()
-    result = dict(u, **s)
-    return json.dumps({'result':True, 'user':result}) 
+def api_user(username):
+    u = check_permission(username, get_token(request))
+    user = ''
+    if not isinstance(u, User):
+        u = User.get(student_id=str(username))
+        name = get(s.name for s in StudentInfo if s.StudentID==username)
+        user = u.to_dict(['student_id', 'avatar'])
+        user['avatar'] = 'user.ecjtu.net/uploads/' + user['avatar']
+        user['name'] = name
+    else:
+        r = get(s for s in StudentInfo if s.StudentID==username)
+        u = u.to_dict(exclude='password')
+        s = r.to_dict()
+        user = dict(u, **s)
+    return json.dumps({'result':True, 'user':user}) 
 
 @app.route("/api/user/<int:username>", methods=['POST'])
 @db_session
