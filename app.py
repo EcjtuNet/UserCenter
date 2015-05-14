@@ -83,6 +83,8 @@ def api_user(username):
     user = ''
     if not isinstance(u, User):
         u = User.get(student_id=str(username))
+        if not u:
+            return json.dumps({'result':False, 'msg':'No such user'})
         name = get(s.Name for s in StudentInfo if s.StudentID==username)
         user = u.to_dict(['student_id', 'avatar'])
         user['avatar'] = 'user.ecjtu.net/uploads/' + user['avatar']
