@@ -1,0 +1,5 @@
+flask
+pony
+apscheduler
+mysql-python
+Pillow
