@@ -113,7 +113,7 @@ def api_user_edit(u, username):
 @app.route("/api/user/<int:username>/avatar", methods=['POST'])
 @db_session
 @with_permission
-def api_user_avatar_edit(u, username):s
+def api_user_avatar_edit(u, username):
     img = request.files['avatar']
     img = Image.open(img)
     if not img:
