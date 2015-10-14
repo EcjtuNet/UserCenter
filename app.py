@@ -87,13 +87,13 @@ def api_user(username):
             return json.dumps({'result':False, 'msg':'No such user'})
         name = get(s.Name for s in StudentInfo if s.StudentID==username)
         user = u.to_dict(['student_id', 'avatar'])
-        user['avatar'] = 'user.ecjtu.net/uploads/' + user['avatar']
         user['name'] = name
     else:
         r = get(s for s in StudentInfo if s.StudentID==username)
         u = u.to_dict(exclude='password')
         s = r.to_dict()
         user = dict(u, **s)
+    user['avatar'] = 'user.ecjtu.net/uploads/' + user['avatar']
     return json.dumps({'result':True, 'user':user}) 
 
 @app.route("/api/user/<int:username>", methods=['POST'])
@@ -113,7 +113,7 @@ def api_user_edit(u, username):
 @app.route("/api/user/<int:username>/avatar", methods=['POST'])
 @db_session
 @with_permission
-def api_user_avatar_edit(u, username):
+def api_user_avatar_edit(u, username):s
     img = request.files['avatar']
     img = Image.open(img)
     if not img:
