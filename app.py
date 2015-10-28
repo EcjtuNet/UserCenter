@@ -107,7 +107,9 @@ def api_user_edit(u, username):
     if form:
         u.set(**form)
         u.flush()
-        return json.dumps({'result':True, 'user':u.to_dict(exclude='password')})
+        user = u.to_dict(exclude='password')
+        user['avatar'] = 'user.ecjtu.net/uploads/' + user['avatar']
+        return json.dumps({'result':True, 'user':user})
     return json.dumps({'result':False})
 
 @app.route("/api/user/<int:username>/avatar", methods=['POST'])
