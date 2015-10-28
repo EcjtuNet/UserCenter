@@ -136,8 +136,8 @@ def api_user_pd(username):
     password = request.form['password']
     if not isinstance(u, User):
         u = User.get(student_id=str(username))
-            if not u:
-                return json.dumps({'result':False, 'msg':'No such user'})
+        if not u:
+            return json.dumps({'result':False, 'msg':'No such user'})
     username = username
     password = password
     cursor = db.execute("update user set password = $password where username = $username")
