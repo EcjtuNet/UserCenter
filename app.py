@@ -18,7 +18,7 @@ def get_token(request):
     token = False
     if request.cookies.get('uc_token'):
         token = request.cookies.get('uc_token')
-    if request.form.has_key('token'):
+    if 'token' in request.form:
         token = request.form['token']   
     if request.args.get('token'):
         token = request.args.get('token')
