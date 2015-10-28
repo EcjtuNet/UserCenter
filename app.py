@@ -129,6 +129,18 @@ def api_user_avatar_edit(u, username):
     u.flush()
     return json.dumps({'result':True, 'avatar':'user.ecjtu.net/uploads/'+str(u.avatar)})
 
+@app.route("/api/user/<int:username>/password",methods=['POST'])
+@db_session
+@with_permission
+def api_user_pd(username):
+    password = request.form['password']
+    u = User.get(student_id=str(username))
+        if not u:
+            return json.dumps({'result':False, 'msg':'No such user'})
+    username = username
+    password = password
+    cursor = db.execute("update user set password = $password where username = $username")
+    return json.dumps({'result':True, 'msg':'密码修改成功'})
 @app.route("/login", methods=['GET'])
 @db_session
 def show_login():
