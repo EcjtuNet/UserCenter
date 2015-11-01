@@ -24,8 +24,11 @@ def cronwork1():
             StudentInfo(**row)
         commit()
 
-sched.add_job(cronwork1, 'interval', days=1)
+# sched.add_job(cronwork1, 'interval', days=1)
 
 def start():
-    sched.start()
+    # sched.start()
+    cronwork1()
     print 'cronwork started'
+
+start()
