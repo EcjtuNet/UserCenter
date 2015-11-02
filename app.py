@@ -123,7 +123,7 @@ def api_user_avatar_edit(u, username):
     path = './uploads/' 
     filename = str(u.student_id) + str(int(time.time()))[-2] + '.jpg'
     try:
-        img.thumbnail((64, 64))
+        img.thumbnail((128, 128))
         img.save(path + filename, 'JPEG')
     except:
         return json.dumps({'result':False})
