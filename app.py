@@ -167,6 +167,14 @@ def show_user(u, username):
     print data
     return render_template('user.html', **data)
 
+@app.route("/checktoken")
+@db_session
+def checktoken():
+    u = check_permission(request.form['username'], get_token(request))
+    if isinstance(u, User):
+        return json.dumps({'result': True})
+    return json.dumps({'result': False})
+
 @app.route("/")
 def index():
     return redirect(url_for('show_login'))
