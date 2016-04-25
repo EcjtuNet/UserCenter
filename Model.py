@@ -18,7 +18,7 @@ class User(db.Entity):
     student_id = PrimaryKey(str)
     email = Optional(str, unique=True)
     phone = Optional(str)
-    nikename = Optional(str)
+    nickname = Optional(str)
     ykt = Optional(str)
     reg_time = Required(str)
     avatar = Required(str, default='default.jpg')

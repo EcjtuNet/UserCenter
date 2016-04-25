@@ -102,7 +102,7 @@ def api_user(username):
 def api_user_edit(u, username):
     form = {}
     for i in request.form:
-        if i in ['password','email','phone','ykt','nikename']:
+        if i in ['password','email','phone','ykt','nickname']:
             form[i] = request.form[i]
     if form:
         u.set(**form)
