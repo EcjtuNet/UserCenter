@@ -19,13 +19,13 @@ def get_token(request):
     if request.cookies.get('uc_token'):
         token = request.cookies.get('uc_token')
     if 'token' in request.form:
-        token = request.form['token']   
+        token = request.form['token']
     if request.args.get('token'):
         token = request.args.get('token')
     return token
 
 def check_permission(username, token):
-    u = User.get(student_id=str(username)) 
+    u = User.get(student_id=str(username))
     if not u:
         return 'No such user'
     if not token:
@@ -51,19 +51,20 @@ def with_permission(func):
 @app.route("/api/login", methods=['POST'])
 @db_session
 def api_login():
-    username = request.form['username']
-    password = request.form['password']
-    u = User.login(username, password)
+    username = request.form.get('username')
+    password = request.form.get('password')
+    salt_password = User._salt(username, password)
+    u = User.login(username, salt_password)
     if u:
         return json.dumps({'result':True,'token':u.token.to_dict()['token']})
     else:
         return json.dumps({'result':False, 'msg':'Username or password is incorrect', 'token':''})
-    
+
 @app.route("/api/register", methods=['POST'])
 @db_session
 def api_register():
-    username = request.form['username']
-    password = request.form['password']
+    username = request.form.get('username')
+    password = request.form.get('password')
     if User.is_exist(username):
         return json.dumps({'result':False, 'msg':'Username exist'})
     u = User.register(username, password)
@@ -94,7 +95,7 @@ def api_user(username):
         s = r.to_dict()
         user = dict(u, **s)
     user['avatar'] = 'user.ecjtu.net/uploads/' + user['avatar']
-    return json.dumps({'result':True, 'user':user}) 
+    return json.dumps({'result':True, 'user':user})
 
 @app.route("/api/user/<int:username>", methods=['POST'])
 @db_session
@@ -120,7 +121,7 @@ def api_user_avatar_edit(u, username):
     img = Image.open(img)
     if not img:
         return json.dumps({'result':False})
-    path = './uploads/' 
+    path = './uploads/'
     filename = str(u.student_id) + str(int(time.time()))[-2] + '.jpg'
     try:
         img.thumbnail((128, 128))
@@ -137,22 +138,25 @@ def show_login():
     token = get_token(request)
     if token:
         t = Token.get(token=token)
-        if not t.is_expired():
-            return redirect(url_for('show_user'))
+        if t:
+            if not t.is_expired():
+                return redirect(url_for('show_user'))
     return render_template('login.html')
 
 @app.route("/login", methods=['POST'])
 @db_session
 def login():
-    username = request.form['username']
-    password = request.form['password']
+    username = request.form.get('username')
+    password = request.form.get('password')
+    salt_password = User._salt(username, password)
     redirect_url = request.args.get('redirect') if request.args.get('redirect') else url_for('show_user')
-    u = User.login(username, password)
+    u = User.login(username, salt_password)
     if u:
         resp = make_response(redirect(redirect_url))
         expires = int(time.time()) + Config.get('cookie_expire')
-        resp.set_cookie('student_id', u.student_id, expires=expires, domain='.ecjtu.net')
-        resp.set_cookie('uc_token', u.token.to_dict()['token'], expires=expires, domain='.ecjtu.net')
+        domain = Config.get('cookie_domain')
+        resp.set_cookie('student_id', u.student_id, expires=expires, domain=domain)
+        resp.set_cookie('uc_token', u.token.to_dict()['token'], expires=expires, domain=domain)
         return resp
     else:
         return render_template('login.html', error=True)
@@ -164,7 +168,6 @@ def show_user(u, username):
     r = get(s for s in StudentInfo if s.StudentID==username)
     data = u.to_dict(exclude='password')
     data = dict(data, **(r.to_dict()))
-    print data
     return render_template('user.html', **data)
 
 @app.route("/checktoken")

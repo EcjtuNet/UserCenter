@@ -3,12 +3,15 @@
 from pony.orm import *
 import Config
 import hashlib
+import uuid
 import time
 
+db = Database()
+
 if Config.get('develop') == True:
-    db = Database('sqlite', 'test.sqlite', create_db=True)
+    db.bind('sqlite', 'test.sqlite', create_db=True)
 else:
-    db = Database('mysql', host=Config.get('host'), user=Config.get('user'), passwd=Config.get('passwd'), db=Config.get('db'))
+    db.bind('mysql', host=Config.get('host'), user=Config.get('user'), passwd=Config.get('passwd'), db=Config.get('db'))
 
 if Config.get('debug') == True:
     sql_debug(True)
@@ -23,8 +26,10 @@ class User(db.Entity):
     reg_time = Required(str)
     avatar = Required(str, default='default.jpg')
     tokens = Set(lambda: Token)
+
     def before_insert(self):
         self.password = self._salt(self.student_id, self.password)
+
     def before_update(self):
         self.password = self._salt(self.student_id, self.password)
 
@@ -53,32 +58,32 @@ class User(db.Entity):
             return u
         else:
             return False
-    
+
     @classmethod
     def register(cls, username, password):
         return User(
-                name=username, 
-                student_id=username, 
-                password=User._salt(username, password), 
+                student_id=username,
+                password=cls._salt(username, password),
                 reg_time=str(int(time.time()))
                 )
-   
+
     @classmethod
     def is_exist(cls, username):
-        return User.get(student_id=username) 
+        return User.get(student_id=username)
+
+    @classmethod
+    def _salt(cls, username, password):
+        return hashlib.sha256(str(username) + \
+                str(hashlib.sha256(str(password) + \
+                     str(Config.get('salt'))).hexdigest())).hexdigest()
+
+    @classmethod
+    def _makeToken(self, username):
+        return str(uuid.uuid3(uuid.uuid1(),'uctoken').hex)
 
     def _setToken(self):
         self.token = self.tokens.create(token=User._makeToken(self.student_id), last_use_time=str(int(time.time())))
 
-    @classmethod
-    def _salt(self, username, password):
-        return password #!!!
-        return hashlib.sha256(str(username) + \
-                str(hashlib.sha256(str(password)+str(Config.get('salt'))).hexdigest())).hexdigest()
-
-    @classmethod
-    def _makeToken(self, username):
-        return str(hashlib.md5(str(username)+str(int(time.time()))).hexdigest())
 
 class Token(db.Entity):
     user = Required(User)
@@ -94,7 +99,7 @@ class Token(db.Entity):
 
 class StudentInfo(db.Entity):
     StudentID = PrimaryKey(str)
-    ClassCode = Optional(str) 
+    ClassCode = Optional(str)
     Name = Optional(str)
     Sex = Optional(str)
     Birth = Optional(str)
@@ -112,5 +117,5 @@ class StudentInfo(db.Entity):
     PunishFlag = Optional(str)
     IDCard = Optional(str)
     KSH = Optional(str)
-    
-db.generate_mapping(create_tables=True)
+
+db.generate_mapping(check_tables=True, create_tables=True)
