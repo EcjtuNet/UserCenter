@@ -149,9 +149,12 @@ def login():
     username = request.form.get('username')
     password = request.form.get('password')
     salt_password = User._salt(username, password)
-    redirect_url = request.args.get('redirect') if request.args.get('redirect') else url_for('show_user')
     u = User.login(username, salt_password)
     if u:
+        if request.args.get('redirect'):
+            redirect_url = request.args.get('redirect')[:-1] + '?student_id=' + u.student_id +'&uc_token=' + u.token.to_dict()['token']
+        else:
+            redirect_url = url_for('show_user')
         resp = make_response(redirect(redirect_url))
         expires = int(time.time()) + Config.get('cookie_expire')
         domain = Config.get('cookie_domain')

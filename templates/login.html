@@ -20,7 +20,7 @@
 		{% else %}
 		    <p class="helper">在您使用之前，请先登录</p>
 		{% endif %}
-		<form action="login?redirect{{ request.args.redirect }}" method="POST">
+		<form action="login?redirect={{ request.args.redirect }}" method="POST">
 			<input type="number" placeholder="请输入您的学号" name="username" value="{{ request.form.username }}">
                     <input type="text" placeholder="请输入您的密码" name="password">
                     <p class="help-block">*初始密码为您的身份证后6位</p>
